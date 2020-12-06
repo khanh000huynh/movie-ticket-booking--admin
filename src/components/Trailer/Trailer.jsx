@@ -35,12 +35,6 @@ const useStyles = makeStyles({
     "&:hover": {
       opacity: 0.8,
     },
-    "& .MuiSvgIcon-root": {
-      fontSize: "8rem",
-      [theme.breakpoints.down("xs")]: {
-        fontSize: "4rem",
-      },
-    },
   },
   playIcon: {
     width: "100%",

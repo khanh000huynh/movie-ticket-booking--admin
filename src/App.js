@@ -1,6 +1,7 @@
 import React from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
+import MessageBox from "./components/MessageBox/MessageBox";
 import CreateMoviePage from "./pages/CreateMoviePage/CreateMoviePage";
 import CreateShowtimePage from "./pages/CreateShowtimePage/CreateShowtimePage";
 import CreateUserPage from "./pages/CreateUserPage/CreateUserPage";
@@ -26,6 +27,7 @@ const App = () => {
   const token = React.useMemo(() => {
     return credential ? credential.accessToken : null;
   }, [credential]);
+  const messageBox = useSelector((state) => state.page.messageBox);
 
   React.useEffect(() => {
     if (token) dispatch(createAction(SET_CREDENTIAL, credential));
@@ -33,6 +35,9 @@ const App = () => {
 
   return (
     <BrowserRouter>
+      {messageBox && (
+        <MessageBox message={messageBox.message} type={messageBox.type} />
+      )}
       <Switch>
         <Route path="/" component={HomePage} exact />
         <WithHeaderAndDashboard>

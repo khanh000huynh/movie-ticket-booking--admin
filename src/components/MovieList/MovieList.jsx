@@ -1,6 +1,5 @@
 import {
   Box,
-  CardMedia,
   CircularProgress,
   makeStyles,
   Table,
@@ -20,6 +19,7 @@ import {
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { withRouter } from "react-router-dom";
+import noImage from "../../assets/img/no-image.png";
 import { createAction } from "../../redux/actions/actionCreator";
 import { SET_SHOWTIME_BY_MAPHIM } from "../../redux/actions/actionTypes";
 import {
@@ -115,6 +115,7 @@ const MovieList = (props) => {
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("maPhim");
+  const [imageLoaded, setImageLoaded] = React.useState(false);
   const movieList = useSelector((state) => state.movie.movieList);
   const searchInfo = useSelector((state) => state.search.searchInfo);
   const showtime = useSelector((state) => state.showtime.showtime);
@@ -188,6 +189,7 @@ const MovieList = (props) => {
   const handleRedirectToDetailShowtimePage = React.useCallback(
     (maPhim) => () => {
       sessionStorage.setItem("renderShowtimeWithAllTheaters", true);
+      dispatch(setSearchInfo({}));
       dispatch(createAction(SET_SHOWTIME_BY_MAPHIM, {}));
       dispatch(setShowtimeByMaPhim(maPhim));
       props.history.push(`/showtime-management/detail-showtime/${maPhim}`);
@@ -236,6 +238,10 @@ const MovieList = (props) => {
     },
     [order, orderBy]
   );
+
+  const handleOnLoadImage = React.useCallback((event) => {
+    if (event.target.complete) setImageLoaded(true);
+  }, []);
 
   const createData = React.useCallback(
     (hinhAnh, maPhim, tenPhim, maNhom, ngayKhoiChieu) => {
@@ -320,10 +326,12 @@ const MovieList = (props) => {
   const rows = React.useMemo(() => {
     return filteredMovieList.map((movie, index) =>
       createData(
-        <CardMedia
-          image={movie.hinhAnh}
+        <img
+          alt="hinhAnh"
+          src={imageLoaded && movie.hinhAnh ? movie.hinhAnh : noImage}
           className={classes.media}
           key={index}
+          onLoad={handleOnLoadImage}
         />,
         movie.maPhim,
         summary(movie.tenPhim, 97),
@@ -331,29 +339,40 @@ const MovieList = (props) => {
         movie.ngayKhoiChieu
       )
     );
-  }, [filteredMovieList, createData, classes.media, summary]);
+  }, [
+    filteredMovieList,
+    createData,
+    classes.media,
+    handleOnLoadImage,
+    imageLoaded,
+    summary,
+  ]);
 
   const renderHead = React.useCallback(() => {
-    return columns.map((column) => (
-      <TableCell
-        key={column.id}
-        align={column.align}
-        style={{ width: column.width }}
-        sortDirection={order === column.id ? order : false}
-      >
-        {!["hinhAnh", "actions"].includes(column.id) ? (
-          <TableSortLabel
-            active={orderBy === column.id}
-            direction={orderBy === column.id ? order : "asc"}
-            onClick={handleRequestSort(column.id)}
+    return (
+      <TableRow>
+        {columns.map((column) => (
+          <TableCell
+            key={column.id}
+            align={column.align}
+            style={{ width: column.width }}
+            sortDirection={order === column.id ? order : false}
           >
-            {column.label}
-          </TableSortLabel>
-        ) : (
-          column.label
-        )}
-      </TableCell>
-    ));
+            {!["hinhAnh", "actions"].includes(column.id) ? (
+              <TableSortLabel
+                active={orderBy === column.id}
+                direction={orderBy === column.id ? order : "asc"}
+                onClick={handleRequestSort(column.id)}
+              >
+                {column.label}
+              </TableSortLabel>
+            ) : (
+              column.label
+            )}
+          </TableCell>
+        ))}
+      </TableRow>
+    );
   }, [columns, order, orderBy, handleRequestSort]);
 
   const renderMovie = React.useCallback(
@@ -426,9 +445,7 @@ const MovieList = (props) => {
         <>
           <TableContainer className={classes.container}>
             <Table stickyHeader aria-label="sticky table">
-              <TableHead>
-                <TableRow>{renderHead()}</TableRow>
-              </TableHead>
+              <TableHead>{renderHead()}</TableHead>
               <TableBody>{renderBody()}</TableBody>
             </Table>
           </TableContainer>

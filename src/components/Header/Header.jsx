@@ -38,17 +38,19 @@ const useStyles = makeStyles({
     },
   },
   box: {
-    paddingTop: "4rem",
-    [theme.breakpoints.down("xs")]: {
-      paddingTop: "3.125rem",
-    },
+    paddingTop: "8rem !important",
   },
 });
 
-const Header = () => {
+const Header = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const admin = useSelector((state) => state.admin.credential);
+
+  const handleUpdateInfo = React.useCallback(() => {
+    props.history.push(`/user-management/update-user/${admin.taiKhoan}`);
+    sessionStorage.setItem("taiKhoan", admin.taiKhoan);
+  }, [props.history, admin.taiKhoan]);
 
   const handleLogOut = React.useCallback(() => {
     localStorage.removeItem("credential");
@@ -68,7 +70,10 @@ const Header = () => {
               {admin && admin.accessToken ? (
                 <CustomPopover
                   content={`Xin chào, ${admin.hoTen}`}
-                  dropdownList={[<Box onClick={handleLogOut}>Đăng xuất</Box>]}
+                  dropdownList={[
+                    <Box onClick={handleUpdateInfo}>Chỉnh sửa thông tin</Box>,
+                    <Box onClick={handleLogOut}>Đăng xuất</Box>,
+                  ]}
                 />
               ) : null}
             </Grid>

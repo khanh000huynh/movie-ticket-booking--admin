@@ -261,25 +261,29 @@ const UserList = (props) => {
   }, [filteredUserList, createData, summary]);
 
   const renderHead = React.useCallback(() => {
-    return columns.map((column) => (
-      <TableCell
-        key={column.id}
-        align={column.align}
-        style={{ width: column.width }}
-      >
-        {column.id !== "actions" ? (
-          <TableSortLabel
-            active={orderBy === column.id}
-            direction={orderBy === column.id ? order : "asc"}
-            onClick={handleRequestSort(column.id)}
+    return (
+      <TableRow>
+        {columns.map((column) => (
+          <TableCell
+            key={column.id}
+            align={column.align}
+            style={{ width: column.width }}
           >
-            {column.label}
-          </TableSortLabel>
-        ) : (
-          column.label
-        )}
-      </TableCell>
-    ));
+            {column.id !== "actions" ? (
+              <TableSortLabel
+                active={orderBy === column.id}
+                direction={orderBy === column.id ? order : "asc"}
+                onClick={handleRequestSort(column.id)}
+              >
+                {column.label}
+              </TableSortLabel>
+            ) : (
+              column.label
+            )}
+          </TableCell>
+        ))}
+      </TableRow>
+    );
   }, [columns, order, orderBy, handleRequestSort]);
 
   const renderUser = React.useCallback(
@@ -333,7 +337,6 @@ const UserList = (props) => {
   React.useEffect(() => {
     if (searchInfo.length) {
       setPage(0);
-      console.clear();
     }
   }, [searchInfo]);
 
@@ -347,9 +350,7 @@ const UserList = (props) => {
               aria-label="sticky table"
               className={classes.table}
             >
-              <TableHead>
-                <TableRow>{renderHead()}</TableRow>
-              </TableHead>
+              <TableHead>{renderHead()}</TableHead>
               <TableBody>{renderBody()}</TableBody>
             </Table>
           </TableContainer>

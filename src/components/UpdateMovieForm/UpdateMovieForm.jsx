@@ -4,7 +4,11 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { MovieSchema } from "../../formik/schema";
-import { chooseMovie, updateMovie } from "../../redux/actions/movieActions";
+import {
+  chooseMovie,
+  setMovieList,
+  updateMovie,
+} from "../../redux/actions/movieActions";
 import theme from "../../theme/theme";
 import { toDMY, toYMD } from "../../utils/datetime";
 import CreateButton from "../CreateButton/CreateButton";
@@ -100,7 +104,9 @@ const useStyle = makeStyles({
 const UpdateMovieForm = (props) => {
   const classes = useStyle();
   const dispatch = useDispatch();
+  const movieList = useSelector((state) => state.movie.movieList);
   const movie = useSelector((state) => state.movie.chosenMovie);
+  const messageBox = useSelector((state) => state.page.messageBox);
   const [image, setImage] = React.useState("");
   const movieInfo = React.useMemo(() => {
     if (!movie) return;
@@ -116,6 +122,46 @@ const UpdateMovieForm = (props) => {
       danhGia: movie.danhGia,
     };
   }, [movie]);
+  const updatedMovie = React.useMemo(() => {
+    if (!movieList) return;
+    const chosenMovie = movieList.find((item) => item.maPhim === movie.maPhim);
+    return chosenMovie;
+  }, [movieList, movie.maPhim]);
+
+  const convertImageUrlToFile = React.useCallback(
+    (imgUrl) => {
+      if (!movie.biDanh) return;
+      let url = imgUrl;
+      const toDataURL = (url) =>
+        fetch(url)
+          .then((response) => response.blob())
+          .then(
+            (blob) =>
+              new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+              })
+          );
+      const dataURLToFile = (dataurl, filename) => {
+        let arr = dataurl.split(","),
+          mime = arr[0].match(/:(.*?);/)[1],
+          bstr = atob(arr[1]),
+          n = bstr.length,
+          u8arr = new Uint8Array(n);
+        while (n--) {
+          u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new File([u8arr], filename, { type: mime });
+      };
+      const result = toDataURL(url).then((dataUrl) => {
+        return dataURLToFile(dataUrl, url.slice(url.lastIndexOf("/") + 1));
+      });
+      return result;
+    },
+    [movie.biDanh]
+  );
 
   const handleChangeImage = React.useCallback((event, setFieldValue) => {
     const imageFile = event.target.files[0];
@@ -125,15 +171,22 @@ const UpdateMovieForm = (props) => {
   }, []);
 
   const handleUpdateMovie = React.useCallback(
-    (values) => {
-      values.ngayKhoiChieu = toDMY(new Date(values.ngayKhoiChieu));
+    async (values) => {
+      values.ngayKhoiChieu = toYMD(toDMY(new Date(values.ngayKhoiChieu)));
+      const clone = { ...values };
       const formData = new FormData();
-      for (let key in values) {
-        formData.append(key, values[key]);
+      for (let key in clone) {
+        if (key === "ngayKhoiChieu") clone[key] = toDMY(new Date(clone[key]));
+        if (key === "hinhAnh" && typeof clone[key] === "string") {
+          clone[key] = await convertImageUrlToFile(clone[key]);
+          clone[key] && setImage(URL.createObjectURL(clone[key]));
+          console.log(clone[key]);
+        }
+        formData.append(key, clone[key]);
       }
       dispatch(updateMovie(formData));
     },
-    [dispatch]
+    [convertImageUrlToFile, dispatch]
   );
 
   React.useEffect(() => {
@@ -149,6 +202,16 @@ const UpdateMovieForm = (props) => {
     if (chosenMovie) dispatch(chooseMovie(chosenMovie));
   }, [dispatch]);
 
+  React.useEffect(() => {
+    dispatch(setMovieList());
+  }, [dispatch]);
+
+  React.useEffect(() => {
+    if (!updatedMovie || !messageBox || messageBox.type !== "success") return;
+    console.log(messageBox);
+    sessionStorage.setItem("chosenMovie", JSON.stringify(updatedMovie));
+  }, [updatedMovie, messageBox]);
+
   return (
     <>
       {movie && movie.maPhim && (
@@ -157,7 +220,7 @@ const UpdateMovieForm = (props) => {
           validationSchema={MovieSchema}
           onSubmit={handleUpdateMovie}
         >
-          {({ errors, touched, values, isValid, setFieldValue }) => (
+          {({ errors, dirty, touched, values, isValid, setFieldValue }) => (
             <Form className={classes.root} spellCheck="false">
               <Grid container>
                 <Grid item container xs={6} className={classes.hinhAnhGrid}>

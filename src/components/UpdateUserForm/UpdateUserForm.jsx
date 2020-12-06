@@ -4,6 +4,7 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { UpdateUserSchema } from "../../formik/schema";
+import { logIn } from "../../redux/actions/adminActions";
 import {
   setSearchedAccount,
   updateUser,
@@ -69,11 +70,13 @@ const useStyle = makeStyles({
 const UpdateUserForm = (props) => {
   const classes = useStyle();
   const dispatch = useDispatch();
+  const admin = useSelector((state) => state.admin.credential);
   const searchedAccount = useSelector((state) => state.user.searchedAccount);
   const userInfo = React.useMemo(() => {
     if (!searchedAccount) return;
     return {
       taiKhoan: searchedAccount.taiKhoan,
+      matKhau: searchedAccount.matKhau || "",
       email: searchedAccount.email,
       soDt: searchedAccount.soDt,
       maNhom: "GP01",
@@ -85,8 +88,18 @@ const UpdateUserForm = (props) => {
   const handleUpdateUser = React.useCallback(
     (values) => {
       dispatch(updateUser(values));
+      if (admin.taiKhoan === values.taiKhoan) {
+        setTimeout(() => {
+          dispatch(
+            logIn({
+              taiKhoan: values.taiKhoan,
+              matKhau: values.matKhau,
+            })
+          );
+        }, 800);
+      }
     },
-    [dispatch]
+    [admin.taiKhoan, dispatch]
   );
 
   React.useEffect(() => {
@@ -113,7 +126,7 @@ const UpdateUserForm = (props) => {
           validationSchema={UpdateUserSchema}
           onSubmit={handleUpdateUser}
         >
-          {({ errors, touched, values, isValid }) => (
+          {({ errors, touched, values, isValid, dirty }) => (
             <Form className={classes.root}>
               <Grid container>
                 <Grid item container md={6}>
@@ -128,6 +141,20 @@ const UpdateUserForm = (props) => {
                     id="taiKhoan"
                     value={props.match.params.taiKhoan}
                     placeholder={props.match.params.taiKhoan}
+                  />
+                </Grid>
+                <Grid item container md={6}>
+                  <Grid item container alignItems="center">
+                    <label htmlFor="matKhau">Mật khẩu:</label>
+                    {errors.matKhau && touched.matKhau && (
+                      <ErrorMessage message={errors.matKhau} />
+                    )}
+                  </Grid>
+                  <Field
+                    id="matKhau"
+                    name="matKhau"
+                    placeholder="Mật khẩu..."
+                    type="password"
                   />
                 </Grid>
                 <Grid item container md={6}>
@@ -188,7 +215,9 @@ const UpdateUserForm = (props) => {
                       !values.email ||
                       !values.soDt ||
                       !values.hoTen
-                    ) || !isValid
+                    ) ||
+                    !isValid ||
+                    !dirty
                   }
                 />
               </Box>

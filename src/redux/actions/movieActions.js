@@ -1,6 +1,7 @@
 import connector from "../../configs/connector";
 import { createAction } from "./actionCreator";
 import { CHOOSE_MOVIE, SET_MOVIE_LIST, SET_SHOWING } from "./actionTypes";
+import { setMessageBox } from "./pageAction";
 
 export const setMovieList = () => {
   return (dispatch) => {
@@ -19,7 +20,7 @@ export const chooseMovie = (movie) => {
 };
 
 export const createMovie = (formData) => {
-  return () => {
+  return (dispatch) => {
     connector({
       url:
         "https://movie0706.cybersoft.edu.vn/api/QuanLyPhim/ThemPhimUploadHinh",
@@ -27,10 +28,22 @@ export const createMovie = (formData) => {
       data: formData,
     })
       .then(() => {
-        alert("Đã thêm 1 phim mới!");
+        dispatch(
+          setMessageBox({
+            isOpened: true,
+            message: "Đã thêm 1 phim mới!",
+            type: "success",
+          })
+        );
       })
       .catch((err) => {
-        alert(err.response.data);
+        dispatch(
+          setMessageBox({
+            isOpened: true,
+            message: err.response.data,
+            type: "error",
+          })
+        );
       });
   };
 };
@@ -44,16 +57,25 @@ export const updateMovie = (formData) => {
       data: formData,
     })
       .then((res) => {
-        alert(
-          `Đã cập nhật phim "${formData.get("tenPhim")}" (${formData.get(
-            "maPhim"
-          )})`
+        dispatch(
+          setMessageBox({
+            isOpened: true,
+            message: `Đã cập nhật phim "${formData.get(
+              "tenPhim"
+            )}" (${formData.get("maPhim")})`,
+            type: "info",
+          })
         );
         dispatch(setMovieList());
-        console.log(res.data);
       })
       .catch((err) => {
-        alert("Xảy ra lỗi!");
+        dispatch(
+          setMessageBox({
+            isOpened: true,
+            message: `Xảy ra lỗi! (${err.response.status})`,
+            type: "error",
+          })
+        );
         console.log(err);
       });
   };
@@ -68,10 +90,23 @@ export const deleteMovie = (info) => {
       method: "DELETE",
     })
       .then(() => {
-        alert(`Đã xóa phim "${tenPhim}" (${maPhim})!`);
+        dispatch(
+          setMessageBox({
+            isOpened: true,
+            message: `Đã xóa phim "${tenPhim}" (${maPhim})!`,
+            type: "success",
+          })
+        );
         dispatch(setMovieList());
       })
       .catch((err) => {
+        dispatch(
+          setMessageBox({
+            isOpened: true,
+            message: err.response.data,
+            type: "error",
+          })
+        );
         console.log(err);
       });
   };

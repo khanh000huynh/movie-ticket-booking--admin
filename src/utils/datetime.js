@@ -23,3 +23,14 @@ export const convert = (inputTime) => {
   minutes = minutes < 10 ? "0" + minutes : minutes;
   return hours + ":" + minutes;
 };
+
+export const convertToHHMMSS = (inputTime) => {
+  let clone = new Date(inputTime);
+  let hours = clone.getHours();
+  hours = hours < 10 ? "0" + hours : hours;
+  let minutes = clone.getMinutes();
+  minutes = minutes < 10 ? "0" + minutes : minutes;
+  let seconds = clone.getSeconds();
+  seconds = seconds < 10 ? "0" + seconds : seconds;
+  return hours + "" + minutes + "" + seconds;
+};

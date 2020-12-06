@@ -12,7 +12,7 @@ export const MovieSchema = Yup.object().shape({
   trailer: Yup.string().required("Trailer không được để trống!"),
   // hinhAnh: Yup.object().required("Vui lòng chọn hình!"),
   moTa: Yup.string()
-    .max(500, "Mô tả không quá 500 kí tự!")
+    .max(1000, "Mô tả không quá 1000 kí tự!")
     .required("Mô tả không được để trống!"),
   ngayKhoiChieu: Yup.string().required("Vui lòng chọn ngày hợp lệ!"),
 });
@@ -40,6 +40,8 @@ export const UserSchema = Yup.object().shape({
 });
 
 export const UpdateUserSchema = Yup.object().shape({
+  hoTen: Yup.string().required("Họ tên không được để trống!"),
+  matKhau: Yup.string().required("Mật khẩu không được để trống"),
   email: Yup.string()
     .email("Email không hợp lệ!")
     .required("Email không được để trống"),
@@ -47,7 +49,6 @@ export const UpdateUserSchema = Yup.object().shape({
     /^((09|03|07|08|05)+([0-9]{8}))+$/g,
     "SĐT không hợp lệ!"
   ),
-  hoTen: Yup.string().required("Họ tên không được để trống!"),
 });
 
 export const CreateShowtimeSchema = Yup.object().shape({

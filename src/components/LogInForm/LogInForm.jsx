@@ -1,21 +1,27 @@
-import { Box, Button, Grid, makeStyles, Typography } from "@material-ui/core";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Grid,
+  makeStyles,
+  Typography,
+} from "@material-ui/core";
 import { AccountCircle, LockRounded } from "@material-ui/icons";
 import { Field, Form, Formik } from "formik";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { LogInSchema } from "../../formik/schema";
-import { logIn } from "../../redux/actions/adminActions";
+import { logIn, setIsLoggingIn } from "../../redux/actions/adminActions";
 import theme from "../../theme/theme";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 
 const useStyles = makeStyles({
   root: {
-    height: 690,
+    height: "100%",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    padding: theme.spacing(2, 0),
     backgroundImage: "url('https://tix.vn/app/assets/img/icons/bg2.jpg')",
     backgroundSize: "contain",
     [theme.breakpoints.down("sm")]: {
@@ -65,13 +71,19 @@ const LogInForm = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const admin = useSelector((state) => state.admin.credential);
+  const isLoggingIn = useSelector((state) => state.admin.isLoggingIn);
 
   const handleSubmit = React.useCallback(
     (values) => {
       dispatch(logIn(values));
+      dispatch(setIsLoggingIn(true));
     },
     [dispatch]
   );
+
+  React.useEffect(() => {
+    document.getElementById("taiKhoan").focus();
+  }, []);
 
   React.useEffect(() => {
     const currentPathname = sessionStorage.getItem("currentPathname");
@@ -122,7 +134,11 @@ const LogInForm = (props) => {
                 )}
               </Grid>
               <Button type="submit" className={classes.logInButton}>
-                Đăng nhập
+                {!isLoggingIn ? (
+                  "Đăng nhập"
+                ) : (
+                  <CircularProgress color="secondary" size={25} />
+                )}
               </Button>
             </Grid>
           </Form>

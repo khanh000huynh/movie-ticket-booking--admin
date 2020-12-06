@@ -5,20 +5,35 @@ import {
   SET_SHOWTIME,
   SET_SHOWTIME_BY_MAPHIM,
 } from "./actionTypes";
+import { setMessageBox } from "./pageAction";
 
-export const createShowtime = (createShowtimeInfo) => {
-  connector({
-    url: "https://movie0706.cybersoft.edu.vn/api/QuanLyDatVe/TaoLichChieu",
-    method: "POST",
-    data: createShowtimeInfo,
-  })
-    .then((res) => {
-      console.log(res.data);
-      alert("Đã thêm lịch chiếu mới!");
+export const createShowtime = (createShowtimeInfo, resetForm) => {
+  return (dispatch) => {
+    connector({
+      url: "https://movie0706.cybersoft.edu.vn/api/QuanLyDatVe/TaoLichChieu",
+      method: "POST",
+      data: createShowtimeInfo,
     })
-    .then((err) => {
-      alert(err.response.data);
-    });
+      .then(() => {
+        dispatch(
+          setMessageBox({
+            isOpened: true,
+            message: "Đã thêm lịch chiếu mới!",
+            type: "success",
+          })
+        );
+        resetForm();
+      })
+      .catch((err) => {
+        dispatch(
+          setMessageBox({
+            isOpened: true,
+            message: err.response.data,
+            type: "error",
+          })
+        );
+      });
+  };
 };
 
 export const setIsFinishedLoadingShowtime = (isFinished) => {

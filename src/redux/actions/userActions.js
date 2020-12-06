@@ -1,6 +1,7 @@
 import connector from "../../configs/connector";
 import { createAction } from "./actionCreator";
 import { SET_SEARCHED_ACCOUNT, SET_USER_LIST } from "./actionTypes";
+import { setMessageBox } from "./pageAction";
 
 export const setUserList = () => {
   return (dispatch) => {
@@ -19,7 +20,7 @@ export const setUserList = () => {
 };
 
 export const createUser = (user) => {
-  return () => {
+  return (dispatch) => {
     connector({
       url:
         "https://movie0706.cybersoft.edu.vn/api/QuanLyNguoiDung/ThemNguoiDung",
@@ -27,16 +28,28 @@ export const createUser = (user) => {
       data: user,
     })
       .then(() => {
-        alert("Đã thêm 1 người dùng mới!");
+        dispatch(
+          setMessageBox({
+            isOpened: true,
+            message: "Đã thêm 1 người dùng mới!",
+            type: "success",
+          })
+        );
       })
       .catch((err) => {
-        alert(err.response.data);
+        dispatch(
+          setMessageBox({
+            isOpened: true,
+            message: err.response.data,
+            type: "error",
+          })
+        );
       });
   };
 };
 
 export const updateUser = (user) => {
-  return () => {
+  return (dispatch) => {
     connector({
       url:
         "https://movie0706.cybersoft.edu.vn/api/QuanLyNguoiDung/CapNhatThongTinNguoiDung",
@@ -44,10 +57,22 @@ export const updateUser = (user) => {
       data: user,
     })
       .then(() => {
-        alert(`Đã cập nhật tài khoản "${user.taiKhoan}"`);
+        dispatch(
+          setMessageBox({
+            isOpened: true,
+            message: `Đã cập nhật tài khoản "${user.taiKhoan}"!`,
+            type: "success",
+          })
+        );
       })
       .catch((err) => {
-        alert(err.response.data);
+        dispatch(
+          setMessageBox({
+            isOpened: true,
+            message: err.response.data,
+            type: "error",
+          })
+        );
       });
   };
 };
@@ -59,11 +84,23 @@ export const deleteUser = (taiKhoan) => {
       method: "DELETE",
     })
       .then(() => {
-        alert(`Đã xoá tài khoản "${taiKhoan}"`);
+        dispatch(
+          setMessageBox({
+            isOpened: true,
+            message: `Đã xoá tài khoản "${taiKhoan}"`,
+            type: "success",
+          })
+        );
         dispatch(setUserList());
       })
       .catch((err) => {
-        alert(err.response.data);
+        dispatch(
+          setMessageBox({
+            isOpened: true,
+            message: err.response.data,
+            type: "error",
+          })
+        );
       });
   };
 };

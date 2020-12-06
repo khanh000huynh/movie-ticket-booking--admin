@@ -2,32 +2,37 @@ import { Box, Button, makeStyles, Popover } from "@material-ui/core";
 import React from "react";
 import { withRouter } from "react-router-dom";
 
-const useStyles = makeStyles({
-  root: {
-    "&:hover": {
-      backgroundColor: "transparent",
-    },
-    "& span": {
-      textTransform: "none",
-    },
-  },
-  dropdown: {
-    width: 123,
-    fontWeight: 400,
-    cursor: "pointer",
-    "& button": {
-      textTransform: "none",
-      fontWeight: 400,
-    },
-  },
-});
-
 const CustomPopover = (props) => {
-  const classes = useStyles();
   const { content, dropdownList } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
+  const [rootWidth, setRootWidth] = React.useState(0);
+  const useStyles = makeStyles({
+    content: {
+      "&:hover": {
+        backgroundColor: "transparent",
+      },
+      "& span": {
+        textTransform: "none",
+      },
+    },
+    popover: {
+      "& .MuiPaper-root": {
+        borderRadius: 0,
+      },
+    },
+    dropdown: {
+      cursor: "pointer",
+      fontWeight: 400,
+      width: rootWidth,
+      "& button": {
+        textTransform: "none",
+        fontWeight: 400,
+      },
+    },
+  });
+  const classes = useStyles();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -45,9 +50,22 @@ const CustomPopover = (props) => {
     ));
   }, [dropdownList]);
 
+  React.useEffect(() => {
+    setRootWidth(document.querySelector("#content > span").offsetWidth);
+  }, []);
+
+  React.useEffect(() => {
+    setAnchorEl(null);
+  }, [props.location.pathname]);
+
   return (
-    <div>
-      <Button onClick={handleClick} disableRipple className={classes.root}>
+    <>
+      <Button
+        id="content"
+        onClick={handleClick}
+        disableRipple
+        className={classes.content}
+      >
         {content}
       </Button>
       <Popover
@@ -63,10 +81,11 @@ const CustomPopover = (props) => {
           vertical: "top",
           horizontal: "center",
         }}
+        className={classes.popover}
       >
         <Box className={classes.dropdown}>{renderDropdownList()}</Box>
       </Popover>
-    </div>
+    </>
   );
 };
 

@@ -1,6 +1,7 @@
 import { combineReducers } from "redux";
 import { adminReducer } from "./adminReducer";
 import { movieReducer } from "./movieReducer";
+import { pageReducer } from "./pageReducer";
 import { searchReducer } from "./searchReducer";
 import { showtimeReducer } from "./showtimeReducer";
 import { theaterReducer } from "./theaterReducer";
@@ -13,4 +14,5 @@ export const rootReducer = combineReducers({
   user: userReducer,
   theater: theaterReducer,
   showtime: showtimeReducer,
+  page: pageReducer,
 });

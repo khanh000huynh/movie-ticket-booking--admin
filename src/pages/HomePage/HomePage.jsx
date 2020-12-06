@@ -3,7 +3,7 @@ import LogInForm from "../../components/LogInForm/LogInForm";
 
 const HomePage = () => {
   return (
-    <div>
+    <div style={{ height: "100%" }}>
       <LogInForm />
     </div>
   );
